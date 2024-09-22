@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clapper</title>
+    <!-- Include Permanent Marker and Roboto Mono fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Include shadcn ui CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shadcn-ui@latest/dist/shadcn.css">
+    <style>
+        body {
+            font-family: 'Permanent Marker', sans-serif;
+            text-align: center;
+            background-color: black;
+            color: white;
+            padding: 20px;
+        }
+        .card {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+            width: 300px;
+            margin: auto;
+        }
+        .control-group {
+            margin: 15px auto;
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+        input[type="range"] {
+            width: 100%;
+            transform: scale(1.5);
+        }
+        button {
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            padding: 15px;
+            cursor: pointer;
+            position: relative;
+            width: 100px;
+            font-family: 'Roboto Mono', monospace;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+        button.playing {
+            background-color: red;
+        }
+        button:hover {
+            background-color: #ff0000;
+        }
+        label, select {
+            font-family: 'Roboto Mono', monospace;
+            text-transform: uppercase;
+        }
+        #bpmDisplay {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #007BFF;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Clapper</h1>
+
+    <div class="card">
+        <div id="bpmDisplay">120</div>
+        <input type="range" id="bpm" min="60" max="180" value="120" class="shadcn-range">
+
+        <div class="control-group">
+            <label for="timeSig">TIME</label>
+            <select id="timeSig" class="shadcn-select">
+                <option value="4">4/4</option>
+                <option value="3">3/4</option>
+            </select>
+
+            <label for="accent">ACCENT</label>
+            <label class="switch">
+                <input type="checkbox" id="accent">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="control-group">
+            <button id="playStopButton" onclick="togglePlayStop()" class="shadcn-button">Play</button>
+        </div>
+    </div>
+
+    <!-- Audio files -->
+    <audio id="clapSound" src="assets/clap.wav" preload="auto"></audio>
+    <audio id="accentSound" src="assets/accent.wav" preload="auto"></audio>
+
+    <script>
+        let bpm = 120;
+        let interval;
+        let isPlaying = false;
+        let accent = false;
+        let timeSignature = 4;
+        const clapSound = document.getElementById('clapSound');
+        const accentSound = document.getElementById('accentSound');
+        const bpmDisplay = document.getElementById('bpmDisplay');
+        const playStopButton = document.getElementById('playStopButton');
+
+        document.getElementById('bpm').addEventListener('input', function() {
+            bpm = this.value;
+            bpmDisplay.textContent = bpm;
+
+            if (isPlaying) {
+                clearInterval(interval);
+                playClap();
+            }
+        });
+
+        document.getElementById('accent').addEventListener('change', function() {
+            accent = this.checked;
+        });
+
+        document.getElementById('timeSig').addEventListener('change', function() {
+            timeSignature = parseInt(this.value);
+            if (isPlaying) {
+                clearInterval(interval);
+                playClap();
+            }
+        });
+
+        function togglePlayStop() {
+            if (isPlaying) {
+                stopClap();
+            } else {
+                playClap();
+            }
+        }
+
+        function playClap() {
+            const intervalTime = (60 / bpm) * 1000;
+            let beatCount = 0;
+            isPlaying = true;
+
+            playStopButton.textContent = 'Stop';
+            playStopButton.classList.add('playing');
+
+            interval = setInterval(() => {
+                beatCount++;
+                if (accent && beatCount === 1) {
+                    accentSound.currentTime = 0;
+                    accentSound.play();
+                } else {
+                    clapSound.currentTime = 0;
+                    clapSound.play();
+                }
+                if (beatCount >= timeSignature) beatCount = 0;
+            }, intervalTime);
+        }
+
+        function stopClap() {
+            clearInterval(interval);
+            isPlaying = false;
+
+            playStopButton.textContent = 'Play';
+            playStopButton.classList.remove('playing');
+        }
+    </script>
+</body>
+</html>
