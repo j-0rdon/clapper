@@ -22,8 +22,16 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-            width: 300px;
+            max-width: 400px;
+            width: 100%;
             margin: auto;
+        }
+        @media (max-width: 768px) {
+            .card {
+                width: 100vw;
+                padding: 10px;
+                box-sizing: border-box;
+            }
         }
         .control-group {
             margin: 15px auto;
@@ -32,8 +40,10 @@
             gap: 15px;
         }
         input[type="range"] {
-            width: 100%;
-            transform: scale(1.5);
+            width: 90%;
+            margin: 10px auto;
+            display: block;
+            transform: scale(1.2); /* Slightly smaller slider */
         }
         button {
             background-color: #333;
